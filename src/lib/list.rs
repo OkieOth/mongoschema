@@ -3,37 +3,37 @@ use clap::Args;
 #[derive(Debug, Args)]
 pub struct ListDbsArgs {
     /// Connection string to mongodb
-    #[clap(short, long)]
+    #[clap(long)]
     pub conn_str: String,
 
     /// Prints more verbose output
-    #[clap(short, long, default_value_t = false)]
+    #[clap(long, default_value_t = false)]
     pub verbose: bool,
 }
 
 #[derive(Debug, Args)]
 pub struct ListCollectionsArgs {
     /// Connection string to mongodb
-    #[clap(short, long)]
+    #[clap(long)]
     pub conn_str: String,
 
     /// Database to use
-    #[clap(short, long)]
+    #[clap(long)]
     pub db: String,
 
     /// Prints more verbose output
-    #[clap(short, long, default_value_t = false)]
+    #[clap(long, default_value_t = false)]
     pub verbose: bool,
 }
 
 #[derive(Debug, Args)]
 pub struct ListIndexesArgs {
     /// Connection string to mongodb
-    #[clap(short, long)]
+    #[clap(long)]
     pub conn_str: String,
 
     /// Database to use
-    #[clap(short, long)]
+    #[clap(long)]
     pub db: String,
 
     /// Database to use
@@ -41,7 +41,7 @@ pub struct ListIndexesArgs {
     pub collection: String,
 
     /// Prints more verbose output
-    #[clap(short, long, default_value_t = false)]
+    #[clap(long, default_value_t = false)]
     pub verbose: bool,
 }
 

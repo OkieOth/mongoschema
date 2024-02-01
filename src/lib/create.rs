@@ -3,19 +3,19 @@ use clap::Args;
 #[derive(Debug, Args)]
 pub struct CreateArgs {
     /// Connection string to mongodb
-    #[clap(short, long)]
+    #[clap(long)]
     pub conn_str: String,
 
     /// Database to use
-    #[clap(short, long)]
+    #[clap(long)]
     pub db: String,
 
     /// Collections to parse
-    #[clap(short, long)]
+    #[clap(long)]
     pub collections: Vec<String>,
 
     /// Directory to write the created schemas in. If not given, then the output is to stdout
-    #[clap(short, long)]
+    #[clap(long)]
     pub output_dir: Option<String>,
 
     /// If set to true, then in the output for every type will receive a dummy description field

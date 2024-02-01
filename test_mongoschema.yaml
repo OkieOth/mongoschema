@@ -12,9 +12,10 @@ services:
     image: mongo:4
     depends_on:
       - mongodb
-    command: ["mongo", "--host", "mongodb", "-u", "admin", "-p", "secretpassword", "--authenticationDatabase", "admin", "/docker-entrypoint-initdb.d/init.js"]
+    command: ["/prepare_mongo.sh"]
     volumes:
-      - ./resources/init.js:/docker-entrypoint-initdb.d/init.js
+      - ./resources/init.js:/initdb.d/init.js
+      - ./resources/prepare_mongo.sh:/prepare_mongo.sh
 
   test_runner:
     build:

@@ -4,7 +4,9 @@ use env_logger::Env;
 
 use clap::{Parser, Subcommand};
 
-use mongoschema_impl::{CreateArgs, create_schemas};
+use mongoschema_impl::{CreateArgs, create_schemas,
+        ListDbsArgs, ListCollectionsArgs, ListIndexesArgs,
+        list_collections, list_dbs, list_indexes};
 
 
 /// Here's my app!
@@ -19,6 +21,12 @@ pub struct App {
 enum Command {
     /// Use the program as a subscriber.
     Create(CreateArgs),
+    /// List all databases in to that connection.
+    Dbs(ListDbsArgs),
+    /// List all collections in a given database.
+    Collections(ListCollectionsArgs),
+    /// List all indexes for a given collection of a database.
+    Indexes(ListIndexesArgs),
 }
 
 
@@ -31,9 +39,10 @@ async fn main() -> mongodb::error::Result<()> {
 
     let parser = App::parse();
     match parser.command {
-        Command::Create(args) => {
-            create_schemas(args).await;
-        }
+        Command::Create(args) => create_schemas(args).await,
+        Command::Dbs(args) => list_dbs(args).await,
+        Command::Collections(args) => list_collections(args).await,
+        Command::Indexes(args) => list_indexes(args).await,
     };
 
     Ok(())

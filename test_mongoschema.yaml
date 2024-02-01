@@ -12,7 +12,7 @@ services:
     image: mongo:4
     depends_on:
       - mongodb
-    command: ["mongo", "--host", "mongo", "-u", "admin", "-p", "secretpassword", "--authenticationDatabase", "admin", "/docker-entrypoint-initdb.d/init.js"]
+    command: ["mongo", "--host", "mongodb", "-u", "admin", "-p", "secretpassword", "--authenticationDatabase", "admin", "/docker-entrypoint-initdb.d/init.js"]
     volumes:
       - ./resources/init.js:/docker-entrypoint-initdb.d/init.js
 

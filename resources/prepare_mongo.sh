@@ -12,6 +12,7 @@ while [ $attempts -lt $max_attempts ]; do
     # Run the command
     $command_to_run
     if [ $? -eq 0 ]; then
+        echo "Database initialized"
         break
     else
         ((attempts++))
@@ -26,4 +27,9 @@ if [ $attempts -eq $max_attempts ]; then
     exit 1
 fi
 
+touch /done.txt
 
+while true; do
+    echo "i am still there ... |-)"
+    sleep 5
+done

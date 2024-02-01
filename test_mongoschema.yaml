@@ -7,6 +7,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: secretpassword
+    networks:
+      - test_network
 
   mongo_init:
     image: mongo:4
@@ -16,6 +18,13 @@ services:
     volumes:
       - ./resources/init.js:/initdb.d/init.js
       - ./resources/prepare_mongo.sh:/prepare_mongo.sh
+    networks:
+      - test_network
+    healthcheck:
+      test: ["CMD-SHELL", "cat /done.txt"]
+      interval: 5s
+      timeout: 1s
+      retries: 100
 
   test_runner:
     build:
@@ -24,7 +33,8 @@ services:
         DOCKER_BUILDKIT: 1
       dockerfile: Dockerfile.testrunner
     depends_on:
-      - mongo_init
+      mongo_init:
+        condition: service_healthy
     environment:
       - MONGO_CONSTR=mongodb://admin:secretpassword@mongodb:27017/admin
     networks:

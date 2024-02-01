@@ -6,4 +6,4 @@ COPY . .
 
 RUN cargo test
 
-CMD ["cargo", "test", "", "--", "--ignored", " --nocapture"]
+CMD ["cargo", "test", "", "--", "--ignored", " --show-output"]

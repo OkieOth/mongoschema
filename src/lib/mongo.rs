@@ -40,6 +40,7 @@ mod test {
                 Ok(s) => s,
                 Err(_) => "mongodb://admin:secretpassword@localhost:27017/admin".to_string(),
             };
+            println!("test_connection: constr={}", con_str);
             let client_options = ClientOptions::parse_async(con_str).await.unwrap();
             // Create a new client and connect to the server
             let client = Client::with_options(client_options).unwrap();

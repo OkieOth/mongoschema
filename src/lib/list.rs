@@ -1,4 +1,6 @@
 use clap::Args;
+use crate::mongo::MongoClient;
+use crate::utils::size_str;
 
 #[derive(Debug, Args)]
 pub struct ListDbsArgs {
@@ -46,6 +48,17 @@ pub struct ListIndexesArgs {
 }
 
 pub async fn list_dbs(args: ListDbsArgs) {
+    let client = MongoClient::new(&args.conn_str).await;
+    for d in client.client.list_databases(None, None).await.unwrap() {
+        if args.verbose {
+            let name = d.name;
+            let size_on_disk = size_str(d.size_on_disk);
+            println!("name: {}, size_on_disk: {}", name, size_on_disk);
+        } else {
+            println!("{}", d.name);
+        }
+    }
+
     println!("list_dbs is called");
 }
 

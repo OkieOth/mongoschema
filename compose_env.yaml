@@ -2,16 +2,28 @@ version: '3'
 services:
   mongodb:
     image: mongo:4
-    container_name: my-mongodb
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: secretpassword
 
+  mongo_init:
+    image: mongo:4
+    depends_on:
+      - mongodb
+    command: ["/prepare_mongo.sh", "dev"]
+    volumes:
+      - ./resources/init.js:/initdb.d/init.js
+      - ./resources/prepare_mongo.sh:/prepare_mongo.sh
+    healthcheck:
+      test: ["CMD-SHELL", "cat /done.txt"]
+      interval: 5s
+      timeout: 1s
+      retries: 100
+
   mongo-express:
     image: mongo-express
-    container_name: my-mongo-express
     ports:
       - "8081:8081"
     environment:

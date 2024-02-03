@@ -2,6 +2,8 @@
 
 scriptPos=${0%/*}
 
+dev=$1
+
 command_to_run="mongo --host mongodb -u admin -p secretpassword --authenticationDatabase admin /initdb.d/init.js"
 max_attempts=10
 attempts=0
@@ -29,7 +31,9 @@ fi
 
 touch /done.txt
 
-while true; do
-    echo "i am still there ... |-)"
-    sleep 5
-done
+if [[ -z $dev ]]; then
+    while true; do
+        echo "i am still there ... |-)"
+        sleep 5
+    done
+fi

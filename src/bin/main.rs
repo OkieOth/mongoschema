@@ -4,9 +4,7 @@ use env_logger::Env;
 
 use clap::{Parser, Subcommand};
 
-use mongoschema_impl::{CreateArgs, create_schemas,
-        ListDbsArgs, ListCollectionsArgs, ListIndexesArgs,
-        list_collections, list_dbs, list_indexes};
+use mongoschema_impl::{create_schemas, list_collections, list_dbs, list_indexes, CreateArgs, ListCollectionsArgs, ListDbsArgs, ListIndexesArgs, MongoClient};
 
 
 /// Here's my app!

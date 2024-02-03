@@ -6,4 +6,27 @@
 A tool to guess the schema behind collection data of mongodb
 
 
-WIP
+# Usage
+
+## Create a binary
+
+```bash
+cargo build release
+
+cd target/release
+```
+
+## Query existing databases
+
+```bash
+# prints available commands
+./mongoschema
+
+# show available commandline switches
+./mongoschema dbs --help
+
+# list existing databases
+./mongoschema dbs \
+    --conn-str mongodb://admin:secretpassword@localhost:27017/admin \
+    --verbose
+```

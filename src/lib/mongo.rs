@@ -16,6 +16,13 @@ impl MongoClient {
             client,
         }
     }
+
+    pub async fn ping(&self, db: &str) -> Result<(), String> {
+        match self.client.database(db).run_command(doc! { "ping": 1 }, None).await {
+            Ok(_) => return Ok(()),
+            Err(e) => return Err(e.to_string()),
+        }
+    }
 }
 
 

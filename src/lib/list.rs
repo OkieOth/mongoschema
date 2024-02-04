@@ -1,4 +1,10 @@
+use std::collections::binary_heap::Iter;
+
 use clap::Args;
+use mongodb::options::SelectionCriteria;
+use mongodb::results::CollectionSpecification;
+use mongodb::IndexModel;
+use mongodb::{options::CollectionOptions, Collection, bson::doc};
 use crate::mongo::MongoClient;
 use crate::utils::size_str;
 
@@ -23,7 +29,7 @@ pub struct ListCollectionsArgs {
     #[clap(long)]
     pub db: String,
 
-    /// Prints more verbose output
+    /// Prints more verbose output. Doesn't show additional information.
     #[clap(long, default_value_t = false)]
     pub verbose: bool,
 }
@@ -49,9 +55,9 @@ pub struct ListIndexesArgs {
 
 async fn list_dbs_impl(args: ListDbsArgs) -> Result<Vec<String>, String> {
     let client = MongoClient::new(&args.conn_str).await;
-    let mut ret: Vec<String> = Vec::new();
     match client.client.list_databases(None, None).await {
         Ok(dbs) => {
+            let mut ret: Vec<String> = Vec::new();
             for d in dbs {
                 if args.verbose {
                     let size_on_disk = size_str(d.size_on_disk);
@@ -60,31 +66,135 @@ async fn list_dbs_impl(args: ListDbsArgs) -> Result<Vec<String>, String> {
                     ret.push(format!("{}", d.name));
                 }
             }
+            return Ok(ret);
         },
         Err(e) => return Err(e.to_string()),
     };
-    Ok(ret)
 }
 
 pub async fn list_dbs(args: ListDbsArgs) {
-    if let Ok(text_vec) = list_dbs_impl(args).await {
-        text_vec.iter().for_each(|s| println!("{}", s));
+    match list_dbs_impl(args).await {
+        Ok(text_vec) =>text_vec.iter().for_each(|s| println!("{}", s)),
+        Err(e) => println!("\nerror while query databases\n{}", e),
     }
 }
 
+pub async fn list_collections_impl(args: ListCollectionsArgs) -> Result<Vec<String>, String> {
+    let client = MongoClient::new(&args.conn_str).await;
+
+    if let Err(msg) = client.ping(&args.db).await {
+        return Err(msg);
+    }
+
+    let db = client.client.database(&args.db);
+
+    match db.list_collection_names(None).await {
+        Ok(collection_names) => {
+            let mut ret: Vec<String> = Vec::new();
+            for name in collection_names {
+                if args.verbose {
+                    ret.push(format!("name: {}", name));
+                } else {
+                    ret.push(name);
+                }
+            };
+            return Ok(ret);
+        },
+        Err(e) => {
+            return Err(e.to_string());
+        },
+    };
+}
+
 pub async fn list_collections(args: ListCollectionsArgs) {
-    println!("list_collections is called");
+    match list_collections_impl(args).await {
+        Ok(text_vec) =>text_vec.iter().for_each(|s| println!("{}", s)),
+        Err(e) => println!("\nerror while query collections\n{}", e),
+    }
+}
+
+pub async fn list_indexes_impl(args: ListIndexesArgs) -> Result<Vec<String>, String> {
+    let client = MongoClient::new(&args.conn_str).await;
+
+    if let Err(msg) = client.ping(&args.db).await {
+        return Err(msg);
+    }
+
+    let db = client.client.database(&args.db);
+
+    let c: Collection<()> = db.collection(&args.collection);
+    if let Ok(indexes) = c.list_indexes(None).await.as_mut() {
+        while let Ok(b) = indexes.advance().await {
+            if ! b {
+                break;
+            }
+            let i = indexes.current();
+            println!("{}", i.get)
+        }
+    }
+    todo!();
 }
 
 pub async fn list_indexes(args: ListIndexesArgs) {
-    println!("list_indexes is called");
+    match list_indexes_impl(args).await {
+        Ok(text_vec) =>text_vec.iter().for_each(|s| println!("{}", s)),
+        Err(e) => println!("\nerror while query indexes\n{}", e),
+    }
 }
 
 mod test {
-    use crate::ListDbsArgs;
+    use crate::{ListDbsArgs, ListCollectionsArgs};
 
-    use super::list_dbs_impl;
+    use super::{list_dbs_impl, list_collections_impl};
     use std::env;
+
+
+    #[test]
+    #[ignore]
+    fn test_list_collections_impl() {
+        tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async {
+            let conn_str = match env::var("MONGO_CONSTR") {
+                Ok(s) => s,
+                Err(_) => "mongodb://admin:secretpassword@localhost:27017/admin".to_string(),
+            };
+            println!("test_connection: constr={}", conn_str);
+            let args = ListCollectionsArgs {
+                conn_str,
+                db: "dummy".to_string(),
+                verbose: false,
+            };
+            let dbs_vec = list_collections_impl(args).await.unwrap();
+            assert_eq!(dbs_vec.len(), 2);
+            assert_eq!(dbs_vec[0], "c2".to_string());
+            assert_eq!(dbs_vec[1], "c1".to_string());
+        });
+    }
+
+    #[test]
+    #[ignore]
+    fn test_list_collections_constr() {
+        tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async {
+            let conn_str = match env::var("MONGO_CONSTR") {
+                Ok(s) => s,
+                Err(_) => "mongodb://admin:secretpassword@localhost:27018/admin".to_string(),
+            };
+            println!("test_connection: constr={}", conn_str);
+            let args = ListCollectionsArgs {
+                conn_str,
+                db: "dummy".to_string(),
+                verbose: false,
+            };
+            assert!(list_collections_impl(args).await.is_err());
+        });
+    }
 
     #[test]
     #[ignore]
